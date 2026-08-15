@@ -43,7 +43,11 @@ export default function ResultsList({ results, selected, onToggle, onRemove }) {
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                <Typography variant="subtitle1" component="h3" className="font-semibold">
+                <Typography
+                  variant="subtitle1"
+                  component="h3"
+                  className="min-w-0 flex-1 break-words font-semibold"
+                >
                   <span className="mr-2 text-sm font-normal text-slate-500">#{index + 1}</span>
                   {article.title}
                 </Typography>

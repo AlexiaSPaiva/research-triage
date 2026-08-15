@@ -90,7 +90,6 @@ export default function App() {
     <>
       <SuiteNav
         current="triage"
-        title="research-triage"
         subtitle="Rank articles by lexical similarity to your research profile"
       />
 
@@ -120,19 +119,13 @@ export default function App() {
                 variant="contained"
                 onClick={exportSelected}
                 disabled={selected.size === 0}
-                aria-describedby="export-help"
+                // The button says what it does; the tooltip carries the detail
+                // that used to sit in a caption line under it.
+                title="Downloads a JSON file that stage 2, Reading Versions, imports directly"
               >
-                Export {selected.size} selected → reading-versions
+                Send {selected.size} to Reading
               </Button>
             </div>
-            <Typography
-              id="export-help"
-              variant="caption"
-              color="text.secondary"
-              className="mb-3 block"
-            >
-              Exports a JSON file that reading-versions (stage 2) imports directly.
-            </Typography>
 
             {articles.length === 0 ? (
               <Paper className="p-6 text-center">
@@ -163,7 +156,7 @@ export default function App() {
           component="footer"
           className="mt-8 block"
         >
-          Part 1 of 3 of litpipe · classical information retrieval (TF-IDF + cosine), no machine
+          Stage 1 of 3 of litpipe · classical information retrieval (TF-IDF + cosine), no machine
           learning and no server · data stays in this browser ·{' '}
           <a href="https://github.com/AlexiaSPaiva/research-triage">source</a>
         </Typography>
