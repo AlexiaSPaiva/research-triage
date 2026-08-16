@@ -5,6 +5,7 @@
 import { useRef, useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import Paper from '@mui/material/Paper';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -13,6 +14,11 @@ import Typography from '@mui/material/Typography';
 
 import { parseBibtex } from '../../services/bibtex.js';
 import { parseCsv } from '../../services/csv.js';
+import {
+  DOCUMENT_ACCEPT,
+  importDocuments,
+  isDocument,
+} from '../../services/documentImport.js';
 import { checkFile, IMPORT_LIMITS, safeString } from '../../services/importLimits.js';
 import { readTextFile } from '../../services/fileIo.js';
 
@@ -24,6 +30,7 @@ export default function ArticleInput({ onAdd }) {
   const [title, setTitle] = useState('');
   const [abstract, setAbstract] = useState('');
   const [notice, setNotice] = useState(null);
+  const [busy, setBusy] = useState(false);
   const fileInput = useRef(null);
 
   const addManual = (event) => {
@@ -49,16 +56,44 @@ export default function ArticleInput({ onAdd }) {
   };
 
   const handleFile = async (event) => {
-    const file = event.target.files?.[0];
+    const picked = [...(event.target.files ?? [])];
     event.target.value = '';
-    if (!file) return;
+    if (picked.length === 0) return;
 
-    const fileErrors = checkFile(file);
+    const fileErrors = picked.flatMap((candidate) =>
+      checkFile(candidate).map((message) => `${candidate.name}: ${message}`),
+    );
     if (fileErrors.length > 0) {
       setNotice({ severity: 'error', text: fileErrors.join(' ') });
       return;
     }
 
+    // PDFs and .txt notes are whole documents: one file is one article, and a
+    // batch of them can be read in one go. A .bib/.csv is a list of many
+    // articles, so it stays on the single-file path below.
+    const documents = picked.filter(isDocument);
+    if (documents.length > 0) {
+      setBusy(true);
+      try {
+        const { articles, errors } = await importDocuments(documents);
+        onAdd(articles);
+        setNotice(
+          articles.length === 0
+            ? { severity: 'error', text: errors.join(' ') || 'No text could be read.' }
+            : {
+                severity: errors.length > 0 ? 'warning' : 'success',
+                text:
+                  `Imported ${articles.length} document(s).` +
+                  (errors.length > 0 ? ` ${errors.join(' ')}` : ''),
+              },
+        );
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
+
+    const file = picked[0];
     try {
       const text = await readTextFile(file);
       const isCsv = /\.csv$/i.test(file.name);
@@ -94,7 +129,7 @@ export default function ArticleInput({ onAdd }) {
         Articles
       </Typography>
       <Typography variant="body2" color="text.secondary" className="mb-2">
-        Titles and abstracts only. Nothing leaves your browser — there is no server.
+        Paste one, or hand over the PDFs. Nothing leaves your browser — there is no server.
       </Typography>
 
       <Tabs
@@ -103,7 +138,7 @@ export default function ArticleInput({ onAdd }) {
         aria-label="How to add articles"
       >
         <Tab label="Paste one" id="tab-paste" aria-controls="panel-paste" />
-        <Tab label="Import file" id="tab-file" aria-controls="panel-file" />
+        <Tab label="Import files" id="tab-file" aria-controls="panel-file" />
       </Tabs>
 
       {tab === 0 && (
@@ -141,16 +176,23 @@ export default function ArticleInput({ onAdd }) {
       {tab === 1 && (
         <div id="panel-file" role="tabpanel" aria-labelledby="tab-file" className="mt-4">
           <Typography variant="body2" className="mb-3">
-            BibTeX (<code>.bib</code>) or CSV exported from Zotero, Mendeley, PubMed or Google
-            Scholar. Files are read locally and never uploaded.
+            The papers themselves (<code>.pdf</code>, <code>.txt</code> — several at once), or a
+            reference-manager export (<code>.bib</code>, <code>.csv</code> from Zotero, Mendeley,
+            PubMed, Google Scholar). Files are read in this browser and never uploaded.
           </Typography>
-          <Button variant="contained" onClick={() => fileInput.current?.click()}>
-            Choose file
+          <Button
+            variant="contained"
+            onClick={() => fileInput.current?.click()}
+            disabled={busy}
+            startIcon={busy ? <CircularProgress size={16} color="inherit" /> : null}
+          >
+            {busy ? 'Reading…' : 'Choose files'}
           </Button>
           <input
             ref={fileInput}
             type="file"
-            accept=".bib,.bibtex,.csv,text/csv,text/plain"
+            multiple
+            accept={`${DOCUMENT_ACCEPT},.bib,.bibtex,.csv,text/csv`}
             onChange={handleFile}
             className="hidden"
             aria-hidden="true"
