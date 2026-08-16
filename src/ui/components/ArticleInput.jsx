@@ -14,11 +14,7 @@ import Typography from '@mui/material/Typography';
 
 import { parseBibtex } from '../../services/bibtex.js';
 import { parseCsv } from '../../services/csv.js';
-import {
-  DOCUMENT_ACCEPT,
-  importDocuments,
-  isDocument,
-} from '../../services/documentImport.js';
+import { DOCUMENT_ACCEPT, importDocuments, isDocument } from '../../services/documentImport.js';
 import { checkFile, IMPORT_LIMITS, safeString } from '../../services/importLimits.js';
 import { readTextFile } from '../../services/fileIo.js';
 
