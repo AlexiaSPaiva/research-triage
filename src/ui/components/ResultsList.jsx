@@ -32,7 +32,11 @@ export default function ResultsList({ results, selected, onToggle, onRemove }) {
   return (
     <div className="flex flex-col gap-2">
       {results.map(({ article, score, topTerms }, index) => (
-        <Paper key={article.id} component="article" className="p-3 sm:p-4">
+        <Paper
+          key={article.id}
+          component="article"
+          className={`p-3 shadow-none sm:p-4 ${selected.has(article.id) ? 'border-[#5FA8D3] bg-[#F5FAFD]' : ''}`}
+        >
           <div className="flex items-start gap-3">
             <Checkbox
               checked={selected.has(article.id)}
@@ -48,14 +52,16 @@ export default function ResultsList({ results, selected, onToggle, onRemove }) {
                   component="h3"
                   className="min-w-0 flex-1 break-words font-semibold"
                 >
-                  <span className="mr-2 text-sm font-normal text-slate-500">#{index + 1}</span>
+                  <span className="mr-2 inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-[#E3EEF6] px-1.5 text-xs font-bold text-[#1B4965]">
+                    {index + 1}
+                  </span>
                   {article.title}
                 </Typography>
                 <Tooltip title="Cosine similarity between this article's text and your research profile. It measures shared vocabulary, not scientific quality.">
                   <Typography
                     component="span"
                     variant="h6"
-                    className="tabular-nums"
+                    className="tabular-nums text-[#1B4965]"
                     aria-label={`Similarity ${formatScore(score)}`}
                   >
                     {formatScore(score)}
@@ -100,7 +106,11 @@ export default function ResultsList({ results, selected, onToggle, onRemove }) {
               )}
 
               {article.abstract && (
-                <Accordion disableGutters elevation={0} className="mt-2 border-0 bg-transparent">
+                <Accordion
+                  disableGutters
+                  elevation={0}
+                  className="mt-2 border-0 bg-transparent shadow-none before:hidden"
+                >
                   <AccordionSummary className="px-0">
                     <Typography variant="body2" color="primary">
                       Show abstract

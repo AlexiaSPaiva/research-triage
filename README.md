@@ -4,6 +4,8 @@
 
 **▶ Live app: https://alexiaspaiva.github.io/research-triage/**
 
+New here? Open the app and click **Load an example** to see it working on sample data in one click.
+
 Rank a pile of scientific articles by how much vocabulary they share with your research topic, so you can decide what to read first.
 
 > **Stage 1 of 3 — litpipe**

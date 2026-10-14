@@ -6,12 +6,12 @@ import { useRef, useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import Paper from '@mui/material/Paper';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
+import { Section } from '../../shared/layout.jsx';
 import { parseBibtex } from '../../services/bibtex.js';
 import { parseCsv } from '../../services/csv.js';
 import { DOCUMENT_ACCEPT, importDocuments, isDocument } from '../../services/documentImport.js';
@@ -19,9 +19,9 @@ import { checkFile, IMPORT_LIMITS, safeString } from '../../services/importLimit
 import { readTextFile } from '../../services/fileIo.js';
 
 /**
- * @param {{ onAdd: (articles: import('../../domain/similarity.js').Article[]) => void }} props
+ * @param {{ onAdd: (articles: import('../../domain/similarity.js').Article[]) => void, step?: number }} props
  */
-export default function ArticleInput({ onAdd }) {
+export default function ArticleInput({ onAdd, step }) {
   const [tab, setTab] = useState(0);
   const [title, setTitle] = useState('');
   const [abstract, setAbstract] = useState('');
@@ -120,14 +120,12 @@ export default function ArticleInput({ onAdd }) {
   };
 
   return (
-    <Paper component="section" aria-labelledby="articles-heading" className="p-4 sm:p-6">
-      <Typography id="articles-heading" variant="h2" component="h2" className="mb-1">
-        Articles
-      </Typography>
-      <Typography variant="body2" color="text.secondary" className="mb-2">
-        Paste one, or hand over the PDFs. Nothing leaves your browser — there is no server.
-      </Typography>
-
+    <Section
+      step={step}
+      id="articles-heading"
+      title="Articles"
+      description="Paste one, or hand over the PDFs or a reference-manager export. Nothing leaves your browser."
+    >
       <Tabs
         value={tab}
         onChange={(_event, value) => setTab(value)}
@@ -202,6 +200,6 @@ export default function ArticleInput({ onAdd }) {
           {notice.text}
         </Alert>
       )}
-    </Paper>
+    </Section>
   );
 }
